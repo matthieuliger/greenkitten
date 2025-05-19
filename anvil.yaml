@@ -27,7 +27,7 @@ db_schema:
     server: full
     title: Users
 dependencies: []
-metadata: {title: GreenKitten}
+metadata: {logo_img: 'asset:ChatGPT Image May 19, 2025, 04_23_02 PM.png', title: GreenKitten}
 name: GreenKitten
 package_name: GreenKitten
 renamed: true
