@@ -55,7 +55,9 @@ def get_first_question():
   if "history" not in anvil.server.session:
     anvil.server.session["history"] = _init_history()
     # Return just the assistant’s first question:
-  return anvil.server.session["history"][1]["content"]
+  first_question = anvil.server.session["history"][1]["content"]
+  print(f"First question:{first_question}")
+  return first_question
 
 
 @anvil.server.callable
@@ -77,6 +79,15 @@ def get_next(user_input):
   session_history.append({"role": "assistant", "content": next_q})
   return next_q
 
+def input_box_change(self, **event_args):
+  """This method is called when the text in this text area is edited"""
+  print(event_args)
+  if len(self.input_box.text) > 0:
+    last = self.input_box.text[-1]
+    print("last character", last)
+    if last == "\n":
+      self.submit_button_click()
+      self.input_box.text = ""
 
 @anvil.server.callable
 def extract_and_store_pdf(file_media):
