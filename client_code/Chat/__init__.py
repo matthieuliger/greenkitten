@@ -44,10 +44,10 @@ class Chat(ChatTemplate):
       open_form("Login")
 
   def user_box_change(self, **event_args):
-    print("user_box_change")
+    #print("user_box_change")
     if len(self.user_box.text) > 0:
       last = self.user_box.text[-1]
-      print("last character", last)
+      #print("last character", last)
       if last == "\n":
         self.submit()
         self.user_box.text = ""
