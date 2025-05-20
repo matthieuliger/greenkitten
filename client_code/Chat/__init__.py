@@ -33,7 +33,7 @@ class Chat(ChatTemplate):
       self.login_status.text = f"{logged_in_user['email']} logged in"
       anvil.server.call("clear_history")
       print(f"{logged_in_user['email']} is logged in")
-      self.user_label.text = logged_in_user["email"]
+      #self.user_label.text = logged_in_user["email"]
       anvil.server.call("clear_history")
       print("getting first question")
       self.pika_box.content = anvil.server.call("get_first_question")
@@ -62,7 +62,7 @@ class Chat(ChatTemplate):
     response = anvil.server.call("get_next", self.user_box.text)
     print(f"response to latest user's input: {response}")
 
-    if response.lower() == 'done':
+    if 'done' in response.lower():
       print("The coach is done collecting information")
       self.show_history()
       self.user_box.text = ""
