@@ -86,7 +86,7 @@ def input_box_change(self, **event_args):
   print(event_args)
   if len(self.input_box.text) > 0:
     last = self.input_box.text[-1]
-    print("last character", last)
+    #print("last character", last)
     if last == "\n":
       self.input_box.text = ""
 
@@ -129,6 +129,32 @@ def extract_and_store_pdf(file_media):
       + "PDF (this should not happen)"
     )
     return False
+
+
+@anvil.server.callable
+def save_history(msg):
+  print("Save history")
+  logged_in_user = anvil.users.get_user()
+  if logged_in_user is not None:  
+    row = app_tables.users.get(
+      email = logged_in_user['email']
+    )
+    if row is None:
+      RuntimeError("Logged in user not found, this should not happen")
+    row = app_tables.chat_history.get(
+      user = logged_in_user['email']
+    )
+    if row is not None:
+      print(f"There was already history for user {logged_in_user['email']}, appending.")
+      row['chat_history'] = row['chat_history'] + anvil.server.session["history"]
+    else:
+      print(f"There was no history for user {logged_in_user['email']}, initiating record in database.")
+      app_tables.chat_history.add_row(
+        user = logged_in_user['email'],
+        chat_history = anvil.server.session["history"]
+      )
+  else:
+    print("No user logged in, not saving")
 
 
 @anvil.email.handle_message
