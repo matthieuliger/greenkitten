@@ -1,13 +1,13 @@
 allow_embedding: false
 db_schema:
-  attachements:
+  attachments:
     client: none
     columns:
-    - admin_ui: {order: 1, width: 200}
-      name: attachement
-      type: simpleObject
+    - admin_ui: {order: 0, width: 200}
+      name: attachment
+      type: media
     server: full
-    title: attachements
+    title: attachments
   received_messages:
     client: none
     columns:
