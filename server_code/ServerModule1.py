@@ -139,7 +139,5 @@ def handle_incoming_emails(msg):
     text=msg.text,
     html=msg.html,
   )
-  print(msg_row)
   for a in msg.attachments:
-    print("There was an attachment")
     app_tables.attachments.add_row(attachment=a)
