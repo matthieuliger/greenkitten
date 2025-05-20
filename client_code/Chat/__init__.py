@@ -69,6 +69,7 @@ class Chat(ChatTemplate):
       self.user_box.enabled = False
       anvil.server.call('save_history')
       leads = anvil.server.call('find_leads')
+      self.pika_box.text = leads      
       
     else:
       self.pika_box.text = response

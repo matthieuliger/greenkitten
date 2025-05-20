@@ -147,9 +147,9 @@ def find_leads():
     resume = "(no resume)"
   else:
     resume = row['extracted_text']
-  chat_history = chat_history + {"user" : "this is my resume: {resume}"}
+  #chat_history = chat_history + {"user" : "this is my resume: {resume}"}
 
-  leads_prompt = ("You are a career coach. Given the chat history:" + )
+  leads_prompt = ("You are a career coach. Given the chat history:" + chat_history + "\n Find startups in a relevant region.")
   
   response = client.responses.create(
     model="gpt-4o-mini-2024-07-18",
