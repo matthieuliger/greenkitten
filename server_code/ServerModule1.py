@@ -40,16 +40,17 @@ def send_sign_in_link(email):
 
 def _init_history():
 
-  original_prompt = "You are a career coach helping a client trying to "
+  original_prompt = ("You are a career coach helping a client trying to "
   + "find a new job. " 
   + "You will ask the user questions, then later "
   + "we will look for startups which may have openings suitable "
-  + "for the client. Keep asking question until you have answers to the following :"
-  + ", ".join(list_of_pieces_of_information_to_get)
+  + "for the client. Keep asking question until you have answers to the following :")
+  
+  original_prompt += ", ".join(list_of_pieces_of_information_to_get)
   
   resume = get_resume()
-  if len(resume) > 1:
-    original_prompt += original_prompt + resume
+  #if len(resume) > 1:
+  #  original_prompt += original_prompt + resume
   
   original_prompt +=  "When you are done, just answer 'DONE' (and nothing else)."
   
@@ -133,6 +134,7 @@ def extract_and_store_pdf(file_media):
 
 @anvil.server.callable
 def get_resume():
+  print("get_resume")
   logged_in_user = anvil.users.get_user()
   if logged_in_user is not None:
     resume_row = app_tables.inline_attachments.get(
@@ -142,8 +144,10 @@ def get_resume():
       print(f"No resume found for {logged_in_user['email']}")
       resume = ""
     else:
+      print("Resume available")
       resume = resume_row['extracted_text']
-    return resume
+      print(resume)
+      return resume
   else:
     print(f"No user logged in, no resume to return.")
     return ""
