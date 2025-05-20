@@ -1,5 +1,10 @@
 allow_embedding: false
 db_schema:
+  received_emails:
+    client: none
+    columns: []
+    server: full
+    title: received_emails
   users:
     client: none
     columns:
@@ -47,7 +52,7 @@ services:
 - client_config: {}
   server_config: {}
   source: /runtime/services/anvil/secrets.yml
-- client_config: {allow_signup: true, confirm_email: false, enable_automatically: true, use_email: true, use_google: true, use_token: true}
+- client_config: {allow_signup: false, confirm_email: false, enable_automatically: true, use_email: true, use_google: true, use_token: true}
   server_config: {user_table: users}
   source: /runtime/services/anvil/users.yml
 - client_config: {}
