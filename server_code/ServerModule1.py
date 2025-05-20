@@ -183,7 +183,6 @@ def incoming_email(msg):
         except Exception as e:
           print("Error trying to extract text")
           print(e)
-        text = "N/A"
         
         app_tables.inline_attachments.add_row(
           attachment=media,

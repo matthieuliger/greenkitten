@@ -37,6 +37,7 @@ def extract_text_from_pdf_pypdf2(pdf_media):
   try:
     for page in reader.pages:
       text += page.extract_text() or ""
+    print(f"Returning {text}")
     return text
   except Exception as e:
     print("Error getting pages")
