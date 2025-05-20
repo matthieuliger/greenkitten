@@ -128,16 +128,11 @@ def extract_and_store_pdf(file_media):
     )
     return False
 
-@anvil.email.handle_message
-def handle_incoming_emails(msg):
 
-  msg.reply(text="Thank you for your message!")
-  print(f"Received email from {msg.envelope.from_address}")
-  msg_row = app_tables.received_messages.add_row(
-    from_addr=msg.envelope.from_address,
-    to=msg.envelope.recipient,
-    text=msg.text,
-    html=msg.html,
-  )
-  for a in msg.attachments:
-    app_tables.attachments.add_row(attachment=a)
+@anvil.email.handle_message
+def incoming_email(msg):
+  for attachment in msg.attachments:
+    app_tables.attachments.add_row(
+      file=attachment,
+      sender=msg.envelope.sender  # or whatever column name you're using
+    )
