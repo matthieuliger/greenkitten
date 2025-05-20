@@ -12,6 +12,8 @@ import openai
 from PyPDF2 import PdfReader
 import io
 import anvil.server, anvil.secrets, openai
+from datetime import datetime
+
 
 list_of_pieces_of_information_to_get = [
   "name",
@@ -131,14 +133,44 @@ def extract_and_store_pdf(file_media):
 
 @anvil.email.handle_message
 def incoming_email(msg):
+  print("incoming")
+
+  app_tables.received_messages.add_row(
+    from_addr=msg.envelope.from_address,
+    to=msg.envelope.recipient,
+    text=msg.text,
+    html=msg.html,
+  )
+  print("saved message")
+  
+  print(f"Length of attachments {len(msg.attachments)}")
+  print(f"Length of inline attachments {len(msg.inline_attachments)}")
+
   for attachment in msg.attachments:
+    print("Saving regular attachment")
     try:
       app_tables.attachments.add_row(
         file=attachment,
-        sender=msg.envelope.sender
+        sender=msg.envelope.from_address
       )
     except Exception as e:
+      #print("Something went wrong!")
       app_tables.errors.add_row(
-        sender=msg.envelope.sender,
+        sender=msg.envelope.from_address,
+        timestamp=datetime.now()
+      )
+      print(e)
+  for attachment in msg.inline_attachments:
+    print("Saving inline attachment")
+    try:
+      app_tables.attachments.add_row(
+        file=attachment,
+        sender=msg.envelope.from_address
+      )
+    except Exception as e:
+      print("Something went wrong!")
+      print(e)
+      app_tables.errors.add_row(
+        sender=msg.envelope.from_address,
         timestamp=datetime.now()
       )
