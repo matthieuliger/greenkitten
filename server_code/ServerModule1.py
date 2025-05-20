@@ -44,6 +44,10 @@ original_lead_prompt = (
     + "- Look in news stories, especially if the stories mention growth or product releases.\n"
     + "- For publicly-traded companies prioritize those with large stock price growth "
     + "(but also return startups that are pre-IPO)\n"
+    + "Return:\n"
+    + "- A list of ompanies, with some information about what they do, their size, funding status etc\n"
+    + "- A list of key people the user could contact\n"
+    + "- Relevant news stories about the companies or the field, in the geographic area(s) that are relevant\n"
 )
 
 client = openai.OpenAI(api_key=anvil.secrets.get_secret("OPENAI_API_KEY"))
@@ -66,15 +70,15 @@ def send_sign_in_link(email):
 def _init_history():
     original_prompt = (
         "You are a career coach helping a client trying to "
-        + "find a new job.\n"
+        + "find a new job in a startup.\n"
     )
 
     resume = get_resume()
     original_prompt += f"We already have the user's resume:\n {resume}.\n\n"
     original_prompt += (
-        "You will ask the user questions, then:\n"
-        + "- We will look for startups which may have openings suitable "
-        + "for the client."
+        "You will ask the user questions to help scope, then "
+        + "we will look for startups which may have openings suitable "
+        + "for the user.\n"
         + "- Keep asking question until you have answers to "
         + "the following, either from the resume or from the chat you have "
         + "with the user. That is, if you already have the information from "
