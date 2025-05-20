@@ -83,7 +83,7 @@ def get_next(user_input):
 
 def input_box_change(self, **event_args):
   """This method is called when the text in this text area is edited"""
-  print(event_args)
+  #print(event_args)
   if len(self.input_box.text) > 0:
     last = self.input_box.text[-1]
     #print("last character", last)
