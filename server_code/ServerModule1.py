@@ -16,11 +16,6 @@ from datetime import datetime
 from .Utils import extract_text_from_pdf_pypdf2
 import json
 
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
-openai_api_key = os.getenv("OPENAI_API_KEY")
 
 # model_chat = "gpt-3.5-turbo"
 model_chat = "o4-mini-2025-04-16"
