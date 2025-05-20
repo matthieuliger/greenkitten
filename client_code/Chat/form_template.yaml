@@ -1,5 +1,9 @@
 components:
 - components:
+  - layout_properties: {grid_position: 'PPZXOR,RRPIUJ'}
+    name: title
+    properties: {text: Main Chat}
+    type: Label
   - components:
     - layout_properties: {col_xs: 0, row: LIMNXW, width_xs: 12}
       name: pika_label
@@ -53,10 +57,10 @@ components:
   name: navbar_links
   properties: {border: 1px solid blue}
   type: FlowPanel
-- layout_properties: {slot: title}
-  name: title
-  properties: {text: Main Chat}
-  type: Label
+- layout_properties: {slot: top-left-btn}
+  name: image_1
+  properties: {source: '_/theme/ChatGPT Image May 19, 2025, 04_23_02 PM.png'}
+  type: Image
 container:
   data_bindings: []
   properties: {border: '', html: '@theme:standard-page.html', role: null}
