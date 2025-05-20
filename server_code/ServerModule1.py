@@ -45,7 +45,7 @@ original_lead_prompt = (
     + "- For publicly-traded companies prioritize those with large stock price growth "
     + "(but also return startups that are pre-IPO)\n"
     + "Return:\n"
-    + "- A list of ompanies, with some information about what they do, their size, funding status etc\n"
+    + "- A list of companies, with some information about what they do, their size, funding status etc\n"
     + "- A list of key people the user could contact\n"
     + "- Relevant news stories about the companies or the field, in the geographic area(s) that are relevant\n"
 )
