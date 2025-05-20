@@ -3,7 +3,7 @@ components:
   - components:
     - layout_properties: {col_xs: 0, row: LIMNXW, width_xs: 12}
       name: pika_label
-      properties: {text: Pika}
+      properties: {bold: true, text: Pika, underline: true}
       type: Label
     - layout_properties: {col_xs: 0, row: KMNCUP, width_xs: 12}
       name: pika_box

@@ -123,6 +123,43 @@ def extract_and_store_pdf(file_media):
 
 
 @anvil.server.callable
+def find_leads():
+  logged_in_user = anvil.users.get_user()
+  if logged_in_user is not None:  
+    history_row = app_tables.chat_history.get(
+      user = logged_in_user['email']
+    )
+    if history_row is None:
+      return "No leads, you need to chat with me first!"
+    else:
+      print(f"Chat history for {logged_in_user['email']} found.")
+      chat_history = history_row['chat_history']
+      print(f"History: {json.dumps(chat_history[1:], indent=4)}")
+    
+  else:
+    raise RuntimeError("Logged in user not found when calling 'find_leads', this should not happen")
+    
+  resume_row = app_tables.inline_attachments.get(
+      sender = logged_in_user['email']
+    )
+  if resume_row is None:
+    print(f"No resume found for {logged_in_user['email']}")
+    resume = "(no resume)"
+  else:
+    resume = row['extracted_text']
+  chat_history = chat_history + {"user" : "this is my resume: {resume}"}
+
+  leads_prompt = ("You are a career coach. Given the chat history:" + )
+  
+  response = client.responses.create(
+    model="gpt-4o-mini-2024-07-18",
+    tools=[{"type": "web_search_preview"}],
+    input=leads_prompt,
+  )
+  print(f"Leads: {response}")
+  return response
+
+@anvil.server.callable
 def save_history():
   print("Save history")
   logged_in_user = anvil.users.get_user()
@@ -131,7 +168,7 @@ def save_history():
       email = logged_in_user['email']
     )
     if row is None:
-      RuntimeError("Logged in user not found, this should not happen")
+      raise RuntimeError("Logged in user not found, this should not happen")
     row = app_tables.chat_history.get(
       user = logged_in_user['email']
     )

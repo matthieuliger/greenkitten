@@ -68,6 +68,7 @@ class Chat(ChatTemplate):
       self.pika_box.text = "Ok. I will now work on finding you a job"
       self.user_box.enabled = False
       anvil.server.call('save_history')
+      leads = anvil.server.call('find_leads')
       
     else:
       self.pika_box.text = response
