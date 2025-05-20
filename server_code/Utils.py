@@ -19,18 +19,25 @@ def extract_text_from_pdf_pypdf2(pdf_media):
     print("PDF file")
     
   try:
-    with pdf_media.get_bytes() as f:
-      try:
-        reader = PdfReader(io.BytesIO(f))  # No need to wrap in BytesIO
-      except Exception as e:
-        print("PdfReader or BytesIO error")
-        print(e)
-      print("extracting pages")
-      text = ""
-      for page in reader.pages:
-        text += page.extract_text() or ""
-        return text
+    f =  pdf_media.get_bytes()
+    print("Done getting bytes")
   except Exception as e:
     print("Error trying to get bytes")
     print(e)
     traceback.print_exc()
+    
+  try:
+    reader = PdfReader(io.BytesIO(f))  # No need to wrap in BytesIO
+  except Exception as e:
+    print("PdfReader or BytesIO error")
+    print(e)
+    print("extracting pages")
+  
+  text = ""
+  try:
+    for page in reader.pages:
+      text += page.extract_text() or ""
+    return text
+  except Exception as e:
+    print("Error getting pages")
+    print(e)
