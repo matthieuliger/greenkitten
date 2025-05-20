@@ -16,13 +16,24 @@ from datetime import datetime
 from .Utils import extract_text_from_pdf_pypdf2
 import json
 
+#model_chat = "gpt-3.5-turbo"
+model_chat = "gpt-4o-mini-2024-07-18"
+model_leads = "gpt-4o-mini-2024-07-18"
+
 list_of_pieces_of_information_to_get = [
-  "name",
-  "location",
-  "skills",
-  "experience",
-  "values"
+  "What is the user's desired job title?"
+  "What is the user's desired job location(s)?",
+  "What are the users' skills?",
+  "What are the user's values?",
+  "Does the user want to share more information about the desired job or company?"
 ]
+
+original_lead_prompt = (
+  "You are a career coach. Given the following information, " 
+  + "find startups in a relevant region. Feel free to look online,"
+  + " for example you can use crunchbase or pitchbook to find startups that"
+  + " have had significant fundraising. Also look on linkedin, "
+  + "especially if you see either job ads or posts.")
 
 client = openai.OpenAI(api_key=anvil.secrets.get_secret("OPENAI_API_KEY"))
 
@@ -39,21 +50,25 @@ def send_sign_in_link(email):
   anvil.users.send_token_login_email(email)
 
 def _init_history():
-
   original_prompt = ("You are a career coach helping a client trying to "
-  + "find a new job. " 
-  + "You will ask the user questions, then later "
+  + "find a new job. ")
+
+  resume = get_resume()
+  original_prompt += f"We already have the user's resume:\n {resume}.\n\n"
+  original_prompt += ("You will ask the user questions, then later "
   + "we will look for startups which may have openings suitable "
-  + "for the client. Keep asking question until you have answers to the following :")
+  + "for the client. Keep asking question until you have answers to "
+  + "the following, either from the resume or from the chat you have "
+  + "with the user. That is, if you already have the information from "
+  + "the resume, do not ask again, except to clarify things in the resume.")
   
   original_prompt += ", ".join(list_of_pieces_of_information_to_get)
   
-  resume = get_resume()
+  # resume = get_resume()
   #if len(resume) > 1:
   #  original_prompt += original_prompt + resume
   
   original_prompt +=  "When you are done, just answer 'DONE' (and nothing else)."
-  
   return [
     {
       "role": "system",
@@ -85,7 +100,7 @@ def get_next(user_input):
 
   session_history.append({"role": "user", "content": user_input})
   resp = client.chat.completions.create(
-    model="gpt-3.5-turbo", messages=session_history
+    model=model_chat, messages=session_history
   )
   next_q = resp.choices[0].message.content
   session_history.append({"role": "assistant", "content": next_q})
@@ -155,34 +170,29 @@ def get_resume():
 
 @anvil.server.callable
 def find_leads():
-  logged_in_user = anvil.users.get_user()
-  if logged_in_user is not None:  
-    history_row = app_tables.chat_history.get(
-      user = logged_in_user['email']
-    )
-    if history_row is None:
-      return "No leads, you need to chat with me first!"
-    else:
-      print(f"Chat history for {logged_in_user['email']} found.")
-      chat_history = history_row['chat_history']
-      print(f"History: {json.dumps(chat_history[1:], indent=4)}")
-    
-  else:
-    raise RuntimeError("Logged in user not found when calling 'find_leads', this should not happen")
-    
-
+  history = get_history()
+  print(f"History for leads:{json.dumps(history, indent=3)}")
+  history = history[1:]
+  
+  resume = get_resume()
+  
   #chat_history = chat_history + {"user" : "this is my resume: {resume}"}
-  leads_prompt = [{"system" : "You are a career coach. Given the following chat history, find startups in a relevant region. Feel free to look online, for example use crunchbase or pitchbook to find startups that have had significnat fundraising"}]
-  leads_prompt.extend(chat_history)
-  print(leads_prompt)
+  leads_prompt = [
+    {"role": "system",
+     "content": original_lead_prompt}]
+  leads_prompt.extend(history)
+  leads_prompt.append({"role": "assistant", "content": "what is your resume"})
+  leads_prompt.append({"role": "user", "content": resume})
+  print("Leads prompt:")
+  print(json.dumps(leads_prompt, indent=3))
   
   response = client.responses.create(
-    model="gpt-4o-mini-2024-07-18",
+    model=model_leads,
     tools=[{"type": "web_search_preview"}],
     input=leads_prompt,
   )
-  print(f"Leads: {response}")
-  return response
+  print(f"Leads: {response.output_text}")
+  return response.output_text
 
 @anvil.server.callable
 def save_history():
@@ -199,7 +209,7 @@ def save_history():
     )
     if row is not None:
       print(f"There was already history for user {logged_in_user['email']}, appending.")
-      row['chat_history'] = row['chat_history'] + anvil.server.session["history"]
+      row['chat_history'] = row['chat_history'] + anvil.server.session["history"][1:]
     else:
       print(f"There was no history for user {logged_in_user['email']}, initiating record in database.")
       app_tables.chat_history.add_row(

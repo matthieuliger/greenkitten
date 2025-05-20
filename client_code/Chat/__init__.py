@@ -31,11 +31,12 @@ class Chat(ChatTemplate):
     if logged_in_user is not None:
       # There *is* a logged-in user
       self.login_status.text = f"{logged_in_user['email']} logged in"
+      anvil.server.call("clear_history")
       print(f"{logged_in_user['email']} is logged in")
       self.user_label.text = logged_in_user["email"]
       anvil.server.call("clear_history")
       print("getting first question")
-      self.pika_box.text = anvil.server.call("get_first_question")
+      self.pika_box.content = anvil.server.call("get_first_question")
       
     else:
       # No one’s logged in
@@ -65,14 +66,14 @@ class Chat(ChatTemplate):
       print("The coach is done collecting information")
       self.show_history()
       self.user_box.text = ""
-      self.pika_box.text = "Ok. I will now work on finding you a job"
+      self.pika_box.content = "Ok. I will now work on finding you a job"
       self.user_box.enabled = False
       anvil.server.call('save_history')
       leads = anvil.server.call('find_leads')
-      self.pika_box.text = leads      
+      self.pika_box.content = leads      
       
     else:
-      self.pika_box.text = response
+      self.pika_box.content = response
       self.show_history()
       self.user_box.text = ""
 
