@@ -1,22 +1,28 @@
 components:
 - components:
+  - layout_properties: {grid_position: 'NJQPAN,MNVQHC'}
+    name: image_1
+    properties: {height: 246.25, source: '_/theme/ChatGPT Image May 19, 2025, 04_23_02 PM.png'}
+    type: Image
   - components:
     - layout_properties: {col_xs: 0, row: LIMNXW, width_xs: 12}
       name: pika_label
-      properties: {bold: true, text: Pika, underline: true}
+      properties: {bold: true, font_size: 18, text: Pika, underline: true}
       type: Label
-    - layout_properties: {col_xs: 0, row: QXJDHP, width_xs: 12}
+    - data_bindings:
+      - {code: '', property: border, writeback: false}
+      layout_properties: {col_xs: 0, row: QXJDHP, width_xs: 12}
       name: pika_box
-      properties: {}
+      properties: {background: 'theme:Primary Container'}
       type: RichText
     - layout_properties: {col_xs: 0, row: ZXSIRK, width_xs: 12}
       name: user_label
-      properties: {bold: true, underline: true}
+      properties: {bold: true, font_size: 18, text: User, underline: true}
       type: Label
     - event_bindings: {change: user_box_change}
       layout_properties: {col_xs: 0, row: AXGITI, width_xs: 12}
       name: user_box
-      properties: {height: 96}
+      properties: {background: 'theme:Primary Container', height: 57.5}
       type: TextArea
     layout_properties: {grid_position: 'RFNXGZ,LORITS'}
     name: grid_panel_1
@@ -30,7 +36,7 @@ components:
       type: Label
     - layout_properties: {col_xs: 0, row: EZIIHZ, width_xs: 12}
       name: history_box
-      properties: {auto_expand: false, border: 1px solid black, enabled: false, height: 487.33331298828125}
+      properties: {auto_expand: false, background: 'theme:Dark Overlay 1', border: 1px solid black, enabled: false, height: 251.75}
       type: TextArea
     layout_properties: {grid_position: 'NWNQAP,XIYOJT'}
     name: grid_panel_2
@@ -40,25 +46,22 @@ components:
   name: content_panel
   properties: {col_widths: '{}'}
   type: ColumnPanel
-- layout_properties: {slot: top-left-btn}
-  name: image_1
-  properties: {source: '_/theme/ChatGPT Image May 19, 2025, 04_23_02 PM.png'}
-  type: Image
 - components:
   - components:
-    - name: login_status
-      properties: {}
+    - layout_properties: {}
+      name: login_status
+      properties: {font_size: 12}
       type: Label
     - event_bindings: {click: logout_button_click}
       layout_properties: {}
       name: logout_button
-      properties: {role: elevated-button, text: Logout}
+      properties: {font_size: 12, role: elevated-button, text: Logout}
       type: Button
     layout_properties: {grid_position: 'PNSYUK,PPIASJ'}
     name: navbar_links
     properties: {border: ''}
     type: FlowPanel
-  layout_properties: {slot: top-left-btn}
+  layout_properties: {slot: nav-right}
   name: outlined_card_1
   properties: {role: outlined-card}
   type: ColumnPanel

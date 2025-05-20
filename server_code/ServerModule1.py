@@ -17,14 +17,14 @@ from .Utils import extract_text_from_pdf_pypdf2
 import json
 
 #model_chat = "gpt-3.5-turbo"
-model_chat = "gpt-4o-mini-2024-07-18"
-model_leads = "gpt-4o-mini-2024-07-18"
+model_chat = "o4-mini-2025-04-16"
+model_leads = "gpt-4o-2024-08-06" 
 
 list_of_pieces_of_information_to_get = [
-  "What is the user's desired job title?"
   "What is the user's desired job location(s)?",
   "What are the users' skills?",
   "What are the user's values?",
+  "Assuming we already know the main field the user wants to find a job in, is there a preferred subfield?"
   "Does the user want to share more information about the desired job or company?"
 ]
 
@@ -32,8 +32,11 @@ original_lead_prompt = (
   "You are a career coach. Given the following information, " 
   + "find startups in a relevant region. Feel free to look online,"
   + " for example you can use crunchbase or pitchbook to find startups that"
-  + " have had significant fundraising. Also look on linkedin, "
-  + "especially if you see either job ads or posts.")
+  + " have had significant fundraising. Look on linkedin, "
+  + "especially if you see either job ads or posts. "
+  + "Look in news stories, especially if the stories mention growth or product releases."
+  + "For publicly-traded companies prioritize those with large stock price growth "
+  + "(but also return startups that are pre-IPO)")
 
 client = openai.OpenAI(api_key=anvil.secrets.get_secret("OPENAI_API_KEY"))
 
@@ -60,7 +63,10 @@ def _init_history():
   + "for the client. Keep asking question until you have answers to "
   + "the following, either from the resume or from the chat you have "
   + "with the user. That is, if you already have the information from "
-  + "the resume, do not ask again, except to clarify things in the resume.")
+  + "the resume, do not ask again, except to clarify things in the resume. "
+  + "Feel free to ask more question as you see fit, "
+  + "anything you feel might make you more efficient at finding jobs for the user, in startups."
+  + " Just ask one question at a time.")
   
   original_prompt += ", ".join(list_of_pieces_of_information_to_get)
   
