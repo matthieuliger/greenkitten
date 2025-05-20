@@ -88,7 +88,6 @@ def input_box_change(self, **event_args):
     last = self.input_box.text[-1]
     print("last character", last)
     if last == "\n":
-      self.submit_button_click()
       self.input_box.text = ""
 
 @anvil.server.callable
@@ -143,7 +142,7 @@ def incoming_email(msg):
       html=msg.html,
     )
   except Exception as e:
-    print("Something went wrong trying to save the text\n")
+    print("Something went wrong trying to save the incoming text\n")
     print(e)
     app_tables.errors.add_row(
       sender=msg.envelope.from_address,
@@ -183,13 +182,21 @@ def incoming_email(msg):
         except Exception as e:
           print("Error trying to extract text")
           print(e)
-        
-        app_tables.inline_attachments.add_row(
-          attachment=media,
-          header=content_id,
-          sender=msg.envelope.from_address,
-          extracted_text=text,
+        row = app_tables.inline_attachments.get(
+          sender = msg.envelope.from_address
         )
+        if row is None:
+          print("Sender does not have an attachment in the database")
+          app_tables.inline_attachments.add_row(
+            attachment=media,
+            header=content_id,
+            sender=msg.envelope.from_address,
+            extracted_text=text,
+          )
+        else:
+          print("Sender has an attachment in the database")
+          row['attachment'] = media
+          row['extracted_text'] = text
       else:
         print("PDF not detected")
         app_tables.inline_attachments.add_row(

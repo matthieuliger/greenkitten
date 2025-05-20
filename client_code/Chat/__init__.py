@@ -67,6 +67,7 @@ class Chat(ChatTemplate):
       self.user_box.text = ""
       self.pika_box.text = "Ok. I will now work on finding you a job"
       self.user_box.enabled = False
+      
     else:
       self.pika_box.text = response
       self.show_history()
