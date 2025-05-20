@@ -13,6 +13,7 @@ from PyPDF2 import PdfReader
 import io
 import anvil.server, anvil.secrets, openai
 from datetime import datetime
+from .Utils import extract_text_from_pdf_pypdf2
 
 
 list_of_pieces_of_information_to_get = [
@@ -148,7 +149,7 @@ def incoming_email(msg):
       sender=msg.envelope.from_address,
       timestamp=datetime.now()
     )
-    
+
   print("saved message")
   print(f"Text:{msg.text}")
   print(f"Length of attachments {len(msg.attachments)}")
@@ -173,11 +174,31 @@ def incoming_email(msg):
       
   for content_id, media in msg.inline_attachments.items():
     print("Saving inline attachment")
+    print(f"Media type: {media.content_type}")
     try:
-      app_tables.inline_attachments.add_row(
-        attachment=media,
-        sender=msg.envelope.from_address
-      )
+      if media.content_type.startswith("application/pdf"):
+        print("PDF detected")
+        try:
+          text = extract_text_from_pdf_pypdf2(media)
+        except Exception as e:
+          print("Error trying to extract text")
+          print(e)
+        
+        app_tables.inline_attachments.add_row(
+          attachment=media,
+          header=content_id,
+          sender=msg.envelope.from_address,
+          extracted_text=text,
+          timestamp=datetime.now()
+        )
+      else:
+        print("PDF not detected")
+        app_tables.inline_attachments.add_row(
+          attachment=media,
+          header=content_id,
+          sender=msg.envelope.from_address
+        )
+      
     except Exception as e:
       print("Something went wrong trying to save inline attachment\n")
       print(e)
