@@ -132,7 +132,13 @@ def extract_and_store_pdf(file_media):
 @anvil.email.handle_message
 def incoming_email(msg):
   for attachment in msg.attachments:
-    app_tables.attachments.add_row(
-      file=attachment,
-      sender=msg.envelope.sender  # or whatever column name you're using
-    )
+    try:
+      app_tables.attachments.add_row(
+        file=attachment,
+        sender=msg.envelope.sender
+      )
+    except Exception as e:
+      app_tables.errors.add_row(
+        sender=msg.envelope.sender,
+        timestamp=datetime.now()
+      )
