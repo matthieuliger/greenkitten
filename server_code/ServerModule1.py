@@ -123,7 +123,7 @@ def extract_and_store_pdf(file_media):
 
 
 @anvil.server.callable
-def save_history(msg):
+def save_history():
   print("Save history")
   logged_in_user = anvil.users.get_user()
   if logged_in_user is not None:  
