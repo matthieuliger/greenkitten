@@ -7,51 +7,16 @@ import anvil.tables as tables
 import anvil.tables.query as q
 from anvil.tables import app_tables
 import anvil.server
+import anvil.secrets
+
 from datetime import datetime
 import openai
 from PyPDF2 import PdfReader
 import io
-import anvil.server, anvil.secrets, openai
-from datetime import datetime
-from .Utils import extract_text_from_pdf_pypdf2
 import json
 
-# dummy comment
-
-# model_chat = "gpt-3.5-turbo"
-model_chat = "o4-mini-2025-04-16"
-model_leads = "gpt-4o-2024-08-06"
-
-list_of_pieces_of_information_to_get = [
-    "What is the user's desired job location(s)?",
-    "What are the users' skills?",
-    "What are the user's values?",
-    "Is the user looking to change careers, or stay in the same field?",
-    "What is the user's desired salary range?",
-    "Assuming we already know the main field the user wants to find a job in, is there a preferred subfield?"
-    "Does the user want to share more information about the desired job or company?",
-]
-
-original_lead_prompt = (
-    "You are a career coach. Given the following information,"
-    + "find startups in a relevant region. Feel free to look online."
-    + " - Use crunchbase to find startups that"
-    + " have had significant fundraising.\n"
-    + " - Use pitchbook to find startups that"
-    + " have had significant fundraising.\n"
-    + "- Look on linkedin, "
-    + "especially if you see either job ads or posts. "
-    + "- Look in news stories, especially if the stories mention growth or product releases.\n"
-    + "- For publicly-traded companies prioritize those with large stock price growth "
-    + "(but also return startups that are pre-IPO)\n"
-    + "Return:\n"
-    + "- A list of companies, with some information about what they do, their size, funding status etc\n"
-    + "- A list of key people the user could contact\n"
-    + "- Relevant news stories about the companies or the field, in the geographic area(s) that are relevant\n"
-)
-
-client = openai.OpenAI(api_key=anvil.secrets.get_secret("OPENAI_API_KEY"))
-
+from .utils import extract_text_from_pdf_pypdf2
+from .wrappers import client, original_lead_prompt, _init_history
 
 @anvil.server.callable
 def clear_history():
@@ -60,52 +25,10 @@ def clear_history():
     anvil.server.session["history"] = _init_history()
     return anvil.server.session["history"]
 
-
 @anvil.server.callable
 def send_sign_in_link(email):
     print("sending login link")
     anvil.users.send_token_login_email(email)
-
-
-def _init_history():
-    original_prompt = (
-        "You are a career coach helping a client trying to "
-        + "find a new job in a startup.\n"
-    )
-
-    resume = get_resume()
-    original_prompt += f"We already have the user's resume:\n {resume}.\n\n"
-    original_prompt += (
-        "You will ask the user questions to help scope, then "
-        + "we will look for startups which may have openings suitable "
-        + "for the user.\n"
-        + "- Keep asking question until you have answers to "
-        + "the following, either from the resume or from the chat you have "
-        + "with the user. That is, if you already have the information from "
-        + "the resume, do not ask again, except to clarify things in the resume. \n"
-        + "- Feel free to ask more question as you see fit, "
-        + "anything you feel might make you more efficient at finding jobs "
-        + "for the user, in startups.\n"
-        + "- Just ask one question at a time."
-    )
-
-    original_prompt += "\n - ".join(list_of_pieces_of_information_to_get)
-
-    # resume = get_resume()
-    # if len(resume) > 1:
-    #  original_prompt += original_prompt + resume
-
-    original_prompt += (
-        "When you are done, just answer 'DONE' (and nothing else)."
-    )
-    return [
-        {
-            "role": "system",
-            "content": original_prompt,
-        },
-        {"role": "assistant", "content": "Hello! What is your name?"},
-    ]
-
 
 @anvil.server.callable
 def get_first_question():
@@ -117,12 +40,10 @@ def get_first_question():
     print(f"First question:{first_question}")
     return first_question
 
-
 @anvil.server.callable
 def get_history():
     print("get_history")
     return anvil.server.session["history"]
-
 
 @anvil.server.callable
 def get_next(user_input):
@@ -178,26 +99,6 @@ def extract_and_store_pdf(file_media):
         )
         return False
 
-
-@anvil.server.callable
-def get_resume():
-    print("get_resume")
-    logged_in_user = anvil.users.get_user()
-    if logged_in_user is not None:
-        resume_row = app_tables.inline_attachments.get(
-            sender=logged_in_user["email"]
-        )
-        if resume_row is None:
-            print(f"No resume found for {logged_in_user['email']}")
-            resume = ""
-        else:
-            print("Resume available")
-            resume = resume_row["extracted_text"]
-            print(resume)
-            return resume
-    else:
-        print(f"No user logged in, no resume to return.")
-        return ""
 
 
 @anvil.server.callable

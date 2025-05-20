@@ -43,3 +43,23 @@ def extract_text_from_pdf_pypdf2(pdf_media):
   except Exception as e:
     print("Error getting pages")
     print(e)
+
+def get_resume():
+  print("get_resume")
+  logged_in_user = anvil.users.get_user()
+  if logged_in_user is not None:
+    resume_row = app_tables.inline_attachments.get(
+      sender=logged_in_user["email"]
+    )
+    if resume_row is None:
+      print(f"No resume found for {logged_in_user['email']}")
+      resume = ""
+    else:
+      print("Resume available")
+      resume = resume_row["extracted_text"]
+      print(resume)
+      return resume
+  else:
+    print("No user logged in, no resume to return.")
+    return ""
+
