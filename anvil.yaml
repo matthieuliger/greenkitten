@@ -1,10 +1,30 @@
 allow_embedding: false
 db_schema:
-  received_emails:
+  attachements:
     client: none
-    columns: []
+    columns:
+    - admin_ui: {order: 1, width: 200}
+      name: attachement
+      type: simpleObject
     server: full
-    title: received_emails
+    title: attachements
+  received_messages:
+    client: none
+    columns:
+    - admin_ui: {order: 0, width: 200}
+      name: from_addr
+      type: string
+    - admin_ui: {order: 1, width: 200}
+      name: to
+      type: string
+    - admin_ui: {order: 2, width: 200}
+      name: text
+      type: string
+    - admin_ui: {order: 3, width: 200}
+      name: html
+      type: string
+    server: full
+    title: received_messages
   users:
     client: none
     columns:
