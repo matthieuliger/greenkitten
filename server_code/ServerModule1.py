@@ -26,19 +26,24 @@ list_of_pieces_of_information_to_get = [
     "What is the user's desired job location(s)?",
     "What are the users' skills?",
     "What are the user's values?",
+    "Is the user looking to change careers, or stay in the same field?",
+    "What is the user's desired salary range?",
     "Assuming we already know the main field the user wants to find a job in, is there a preferred subfield?"
     "Does the user want to share more information about the desired job or company?",
 ]
 
 original_lead_prompt = (
-    "You are a career coach. Given the following information, "
-    + "find startups in a relevant region. Feel free to look online,"
-    + " for example you can use crunchbase or pitchbook to find startups that"
-    + " have had significant fundraising. Look on linkedin, "
+    "You are a career coach. Given the following information,"
+    + "find startups in a relevant region. Feel free to look online."
+    + " - Use crunchbase to find startups that"
+    + " have had significant fundraising.\n"
+    + " - Use pitchbook to find startups that"
+    + " have had significant fundraising.\n"
+    + "- Look on linkedin, "
     + "especially if you see either job ads or posts. "
-    + "Look in news stories, especially if the stories mention growth or product releases."
-    + "For publicly-traded companies prioritize those with large stock price growth "
-    + "(but also return startups that are pre-IPO)"
+    + "- Look in news stories, especially if the stories mention growth or product releases.\n"
+    + "- For publicly-traded companies prioritize those with large stock price growth "
+    + "(but also return startups that are pre-IPO)\n"
 )
 
 client = openai.OpenAI(api_key=anvil.secrets.get_secret("OPENAI_API_KEY"))
@@ -61,24 +66,26 @@ def send_sign_in_link(email):
 def _init_history():
     original_prompt = (
         "You are a career coach helping a client trying to "
-        + "find a new job. "
+        + "find a new job.\n"
     )
 
     resume = get_resume()
     original_prompt += f"We already have the user's resume:\n {resume}.\n\n"
     original_prompt += (
-        "You will ask the user questions, then later "
-        + "we will look for startups which may have openings suitable "
-        + "for the client. Keep asking question until you have answers to "
+        "You will ask the user questions, then:\n"
+        + "- We will look for startups which may have openings suitable "
+        + "for the client."
+        + "- Keep asking question until you have answers to "
         + "the following, either from the resume or from the chat you have "
         + "with the user. That is, if you already have the information from "
-        + "the resume, do not ask again, except to clarify things in the resume. "
-        + "Feel free to ask more question as you see fit, "
-        + "anything you feel might make you more efficient at finding jobs for the user, in startups."
-        + " Just ask one question at a time."
+        + "the resume, do not ask again, except to clarify things in the resume. \n"
+        + "- Feel free to ask more question as you see fit, "
+        + "anything you feel might make you more efficient at finding jobs "
+        + "for the user, in startups.\n"
+        + "- Just ask one question at a time."
     )
 
-    original_prompt += ", ".join(list_of_pieces_of_information_to_get)
+    original_prompt += "\n - ".join(list_of_pieces_of_information_to_get)
 
     # resume = get_resume()
     # if len(resume) > 1:
