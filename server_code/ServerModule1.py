@@ -14,13 +14,14 @@ import io
 import anvil.server, anvil.secrets, openai
 from datetime import datetime
 from .Utils import extract_text_from_pdf_pypdf2
-
+import json
 
 list_of_pieces_of_information_to_get = [
   "name",
   "location",
   "skills",
-  "experience"
+  "experience",
+  "values"
 ]
 
 client = openai.OpenAI(api_key=anvil.secrets.get_secret("OPENAI_API_KEY"))
@@ -38,15 +39,24 @@ def send_sign_in_link(email):
   anvil.users.send_token_login_email(email)
 
 def _init_history():
+
+  original_prompt = "You are a career coach helping a client trying to "
+  + "find a new job. " 
+  + "You will ask the user questions, then later "
+  + "we will look for startups which may have openings suitable "
+  + "for the client. Keep asking question until you have answers to the following :"
+  + ", ".join(list_of_pieces_of_information_to_get)
+  
+  resume = get_resume()
+  if len(resume) > 1:
+    original_prompt += original_prompt + resume
+  
+  original_prompt +=  "When you are done, just answer 'DONE' (and nothing else)."
+  
   return [
     {
       "role": "system",
-      "content": "You are a career coach helping a client trying to "
-      + "find a new job. You will ask the user questions, then later "
-      + "we will look for startups which may have openings suitable "
-      + "for the client. Keep asking question until you have answers to the following :"
-      + ", ".join(list_of_pieces_of_information_to_get)
-      + "When you are done, just answer 'DONE' (and nothing else).",
+      "content": original_prompt,
     },
     {"role": "assistant", "content": "Hello! What is your name?"},
   ]
@@ -60,7 +70,6 @@ def get_first_question():
   first_question = anvil.server.session["history"][1]["content"]
   print(f"First question:{first_question}")
   return first_question
-
 
 @anvil.server.callable
 def get_history():
@@ -123,6 +132,24 @@ def extract_and_store_pdf(file_media):
 
 
 @anvil.server.callable
+def get_resume():
+  logged_in_user = anvil.users.get_user()
+  if logged_in_user is not None:
+    resume_row = app_tables.inline_attachments.get(
+      sender = logged_in_user['email']
+    )
+    if resume_row is None:
+      print(f"No resume found for {logged_in_user['email']}")
+      resume = ""
+    else:
+      resume = resume_row['extracted_text']
+    return resume
+  else:
+    print(f"No user logged in, no resume to return.")
+    return ""
+
+
+@anvil.server.callable
 def find_leads():
   logged_in_user = anvil.users.get_user()
   if logged_in_user is not None:  
@@ -139,17 +166,11 @@ def find_leads():
   else:
     raise RuntimeError("Logged in user not found when calling 'find_leads', this should not happen")
     
-  resume_row = app_tables.inline_attachments.get(
-      sender = logged_in_user['email']
-    )
-  if resume_row is None:
-    print(f"No resume found for {logged_in_user['email']}")
-    resume = "(no resume)"
-  else:
-    resume = row['extracted_text']
-  #chat_history = chat_history + {"user" : "this is my resume: {resume}"}
 
-  leads_prompt = ("You are a career coach. Given the chat history:" + chat_history + "\n Find startups in a relevant region.")
+  #chat_history = chat_history + {"user" : "this is my resume: {resume}"}
+  leads_prompt = [{"system" : "You are a career coach. Given the following chat history, find startups in a relevant region. Feel free to look online, for example use crunchbase or pitchbook to find startups that have had significnat fundraising"}]
+  leads_prompt.extend(chat_history)
+  print(leads_prompt)
   
   response = client.responses.create(
     model="gpt-4o-mini-2024-07-18",
