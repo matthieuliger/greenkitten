@@ -211,10 +211,13 @@ def find_leads():
     # chat_history = chat_history + {"user" : "this is my resume: {resume}"}
     leads_prompt = [{"role": "system", "content": original_lead_prompt}]
     leads_prompt.extend(history)
-    leads_prompt.append(
+
+    if resume: 
+      leads_prompt.append(
         {"role": "assistant", "content": "what is your resume"}
-    )
-    leads_prompt.append({"role": "user", "content": resume})
+      )
+      leads_prompt.append({"role": "user", "content": resume})
+
     print("Leads prompt:")
     print(json.dumps(leads_prompt, indent=3))
 
