@@ -35,7 +35,6 @@ def send_sign_in_link(email):
   anvil.users.send_token_login_email(email)
 
 def _init_history():
-  print("_init_history")
   return [
     {
       "role": "system",
@@ -43,11 +42,11 @@ def _init_history():
       + "find a new job. You will ask the user questions, then later "
       + "we will look for startups which may have openings suitable "
       + "for the client. Keep asking question until you have answers to the following :"
-      + ", ".join(list_of_pieces_of_information_to_get),
+      + ", ".join(list_of_pieces_of_information_to_get)
+      + "When you are done, just answer 'DONE' (and nothing else).",
     },
     {"role": "assistant", "content": "Hello! What is your name?"},
   ]
-
 
 @anvil.server.callable
 def get_first_question():
@@ -128,3 +127,17 @@ def extract_and_store_pdf(file_media):
       + "PDF (this should not happen)"
     )
     return False
+
+@anvil.email.handle_message
+def handle_incoming_emails(msg):
+
+  msg.reply(text="Thank you for your message.")
+  print(f"Received email from {msg.envelope.from_address}")
+  msg_row = app_tables.received_messages.add_row(
+    from_addr=msg.envelope.from_address,
+    to=msg.envelope.recipient,
+    text=msg.text,
+    html=msg.html,
+  )
+  for a in msg.attachments:
+    app_tables.attachments.add_row(message=msg_row, attachment=a)
