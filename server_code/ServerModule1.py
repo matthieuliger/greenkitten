@@ -183,13 +183,13 @@ def incoming_email(msg):
         except Exception as e:
           print("Error trying to extract text")
           print(e)
+        text = "N/A"
         
         app_tables.inline_attachments.add_row(
           attachment=media,
           header=content_id,
           sender=msg.envelope.from_address,
           extracted_text=text,
-          timestamp=datetime.now()
         )
       else:
         print("PDF not detected")

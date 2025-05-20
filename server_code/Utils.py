@@ -12,10 +12,12 @@ import io
 import traceback
 
 def extract_text_from_pdf_pypdf2(pdf_media):
+  print(f"type of pdf media {type(pdf_media)}, {pdf_media}")
   if not pdf_media.content_type.startswith("application/pdf"):
     raise ValueError("Not a PDF file")
   else:
     print("PDF file")
+    
   try:
     with pdf_media.get_bytes() as f:
       try:
@@ -29,6 +31,6 @@ def extract_text_from_pdf_pypdf2(pdf_media):
         text += page.extract_text() or ""
         return text
   except Exception as e:
-    print("Error trying to convert")
+    print("Error trying to get bytes")
     print(e)
     traceback.print_exc()
