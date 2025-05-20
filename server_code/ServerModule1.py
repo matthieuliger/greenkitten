@@ -134,41 +134,52 @@ def extract_and_store_pdf(file_media):
 @anvil.email.handle_message
 def incoming_email(msg):
   print("incoming")
-
-  app_tables.received_messages.add_row(
-    from_addr=msg.envelope.from_address,
-    to=msg.envelope.recipient,
-    text=msg.text,
-    html=msg.html,
-  )
+  try:
+    app_tables.received_messages.add_row(
+      from_addr=msg.envelope.from_address,
+      to=msg.envelope.recipient,
+      text=msg.text,
+      html=msg.html,
+    )
+  except Exception as e:
+    print("Something went wrong trying to save the text\n")
+    print(e)
+    app_tables.errors.add_row(
+      sender=msg.envelope.from_address,
+      timestamp=datetime.now()
+    )
+    
   print("saved message")
-  
+  print(f"Text:{msg.text}")
   print(f"Length of attachments {len(msg.attachments)}")
   print(f"Length of inline attachments {len(msg.inline_attachments)}")
-
+  print(f"type of inline attachment iterator {type(msg.inline_attachments)}")
+  print(f"List:{list(msg.inline_attachments)}")
+  
   for attachment in msg.attachments:
     print("Saving regular attachment")
     try:
       app_tables.attachments.add_row(
-        file=attachment,
+        attachment=attachment,
         sender=msg.envelope.from_address
       )
     except Exception as e:
-      #print("Something went wrong!")
+      print("Something went wrong trying to save attachment\n")
       app_tables.errors.add_row(
         sender=msg.envelope.from_address,
         timestamp=datetime.now()
       )
       print(e)
-  for attachment in msg.inline_attachments:
+      
+  for content_id, media in msg.inline_attachments.items():
     print("Saving inline attachment")
     try:
-      app_tables.attachments.add_row(
-        file=attachment,
+      app_tables.inline_attachments.add_row(
+        attachment=media,
         sender=msg.envelope.from_address
       )
     except Exception as e:
-      print("Something went wrong!")
+      print("Something went wrong trying to save inline attachment\n")
       print(e)
       app_tables.errors.add_row(
         sender=msg.envelope.from_address,

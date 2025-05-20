@@ -22,6 +22,17 @@ db_schema:
       type: datetime
     server: full
     title: errors
+  inline_attachments:
+    client: none
+    columns:
+    - admin_ui: {order: 0, width: 200}
+      name: attachment
+      type: string
+    - admin_ui: {order: 1, width: 200}
+      name: sender
+      type: string
+    server: full
+    title: inline_attachments
   received_messages:
     client: none
     columns:
