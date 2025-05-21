@@ -68,21 +68,28 @@ coach_termination = (
     "When you think you have enough information, 'DONE' (and nothing else).\n"
 )
 
+prime = (
+    "First, ask an open ended question to the user, i.e. just ask them to"
+    + " describe what they are looking for, then you'll decide what "
+    + "to ask next as you go."
+)
+
 
 class Coach:
     def __init__(self):
         self.persona = coach_persona_definition
         self.instructions = coach_instructions
         self.termination = coach_termination
+        self.prime = prime
 
     def init_history(self):
-        original_prompt = coach_persona_definition
+        # original_prompt = coach_persona_definition
 
         resume = get_resume()
 
-        original_prompt += coach_instructions
+        # original_prompt += coach_instructions
 
-        original_prompt += "\n - ".join(list_of_pieces_of_information_to_get)
+        # original_prompt += "\n - ".join(list_of_pieces_of_information_to_get)
 
         # resume = get_resume()
         # if len(resume) > 1:

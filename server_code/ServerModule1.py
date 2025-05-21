@@ -41,14 +41,17 @@ def get_first_question():
         # Return just the assistant’s first question:
     session_history = anvil.server.session["history"]
     session_history.append(
-        {"role": "system", "content": "Ask your first question to the user."}
+        {
+            "role": "system",
+            "content": coach.prime,
+        }
     )
 
     first_question = client.chat.completions.create(
         model=model_chat, messages=session_history
     )
     print(f"First question:{first_question}")
-    return first_question
+    return first_question.choices[0].message.content
 
 
 @anvil.server.callable
