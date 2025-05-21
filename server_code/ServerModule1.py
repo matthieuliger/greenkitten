@@ -15,35 +15,47 @@ from PyPDF2 import PdfReader
 import io
 import json
 
-from .utils import extract_text_from_pdf_pypdf2
-from .wrappers import client, original_lead_prompt, _init_history
+from .utils import extract_text_from_pdf_pypdf2, get_resume
+from .coach import client, original_lead_prompt, coach, model_chat, model_leads
+
 
 @anvil.server.callable
 def clear_history():
     """Clear the history of the conversation."""
     print("clear_history")
-    anvil.server.session["history"] = _init_history()
+    anvil.server.session["history"] = coach.init_history()
     return anvil.server.session["history"]
+
 
 @anvil.server.callable
 def send_sign_in_link(email):
     print("sending login link")
     anvil.users.send_token_login_email(email)
 
+
 @anvil.server.callable
 def get_first_question():
     print("get_first_question")
     if "history" not in anvil.server.session:
-        anvil.server.session["history"] = _init_history()
+        anvil.server.session["history"] = coach.init_history()
         # Return just the assistant’s first question:
-    first_question = anvil.server.session["history"][1]["content"]
+    session_history = anvil.server.session["history"]
+    session_history.append(
+        {"role": "system", "content": "Ask your first question to the user."}
+    )
+
+    first_question = client.chat.completions.create(
+        model=model_chat, messages=session_history
+    )
     print(f"First question:{first_question}")
     return first_question
+
 
 @anvil.server.callable
 def get_history():
     print("get_history")
     return anvil.server.session["history"]
+
 
 @anvil.server.callable
 def get_next(user_input):
@@ -100,7 +112,6 @@ def extract_and_store_pdf(file_media):
         return False
 
 
-
 @anvil.server.callable
 def find_leads():
     history = get_history()
@@ -113,11 +124,11 @@ def find_leads():
     leads_prompt = [{"role": "system", "content": original_lead_prompt}]
     leads_prompt.extend(history)
 
-    if resume: 
-      leads_prompt.append(
-        {"role": "assistant", "content": "what is your resume"}
-      )
-      leads_prompt.append({"role": "user", "content": resume})
+    if resume:
+        leads_prompt.append(
+            {"role": "assistant", "content": "what is your resume"}
+        )
+        leads_prompt.append({"role": "user", "content": resume})
 
     print("Leads prompt:")
     print(json.dumps(leads_prompt, indent=3))
